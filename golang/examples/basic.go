@@ -18,9 +18,10 @@ const (
 var (
     colors = []uint32{
         0xFFFFFF, //white
-        //0xFF0000, //green
+        0xFF0000, //green
         0x00FF00, //Red
         0x0000FF, //Blue
+		0x000000, //Black
         //0x00FFFF, //pink
         //0xFFFF00, //yellow
         //0xFF00FF, //light blue
