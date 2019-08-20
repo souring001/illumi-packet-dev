@@ -11,8 +11,8 @@ const (
     pin        = 18
     series     = 4
     count      = 60
-    brightness = 100
-    interval   = time.Millisecond * 100
+    brightness = 50
+    interval   = time.Millisecond * 10
 )
 
 var (
