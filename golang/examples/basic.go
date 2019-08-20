@@ -12,7 +12,7 @@ const (
     series     = 4
     count      = 60
     brightness = 50
-    interval   = time.Millisecond * 10
+    interval   = time.Millisecond * 50
 )
 
 var (
