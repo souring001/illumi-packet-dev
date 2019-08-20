@@ -7,10 +7,11 @@
 
 import time
 from neopixel import *
+import packet
 import argparse
 
 # LED strip configuration:
-LED_COUNT      = 16      # Number of LED pixels.
+LED_COUNT      = 60      # Number of LED pixels.
 LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
 #LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
 LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
@@ -18,8 +19,30 @@ LED_DMA        = 10      # DMA channel to use for generating signal (try 10)
 LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
 LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
+# INTERVAL = 0.05
+INTERVAL = 1
+SPEED = 1
 
+# My definition
+def dispWipe(strip, packets):
+    for i in range(strip.numPixels()):
+        strip.setPixelColor(i, Color(0,0,0))
+    for i, p in enumerate(packets):
+        strip.setPixelColor(p.getPos(), Color(0, 0, 255))
+        print(i, ':', p.getPos())
+    strip.show()
 
+def movePackets(packets):
+    removeList = []
+    for p in packets:
+        out = p.move()
+        if out:
+            removeList.append(p)
+    removePacket(packets, removeList)
+
+def removePacket(packets, removeList):
+    for p in removeList:
+        packets.remove(p)
 
 # Define functions which animate LEDs in various ways.
 def colorWipe(strip, color, wait_ms=50):
@@ -90,6 +113,12 @@ if __name__ == '__main__':
     # Intialize the library (must be called once before other functions).
     strip.begin()
 
+    packets = []
+    packet = Packet(False, SPEED, LED_COUNT)
+    packets.append(packet)
+    packet = Packet(True, SPEED, LED_COUNT)
+    packets.append(packet)
+
     print ('Press Ctrl-C to quit.')
     if not args.clear:
         print('Use "-c" argument to clear LEDs on exit')
@@ -97,18 +126,10 @@ if __name__ == '__main__':
     try:
 
         while True:
-            print ('Color wipe animations.')
-            colorWipe(strip, Color(255, 0, 0))  # Red wipe
-            colorWipe(strip, Color(0, 255, 0))  # Blue wipe
-            colorWipe(strip, Color(0, 0, 255))  # Green wipe
-            print ('Theater chase animations.')
-            theaterChase(strip, Color(127, 127, 127))  # White theater chase
-            theaterChase(strip, Color(127,   0,   0))  # Red theater chase
-            theaterChase(strip, Color(  0,   0, 127))  # Blue theater chase
-            print ('Rainbow animations.')
-            rainbow(strip)
-            rainbowCycle(strip)
-            theaterChaseRainbow(strip)
+            dispWipe(strip, packets)
+            movePackets(packets)
+            time.sleep(INTERVAL)
+            print('------------')
 
     except KeyboardInterrupt:
         if args.clear:
