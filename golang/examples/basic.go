@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "time"
+	"os"
 
     "github.com/jgarff/rpi_ws281x/golang/ws2811"
 )
@@ -17,39 +18,39 @@ const (
 
 var (
     colors = []uint32{
-        0xFFFFFF, //white
-        0xFF0000, //green
+        0xFFFFFF, //White
+        0xFF0000, //Green
         0x00FF00, //Red
         0x0000FF, //Blue
 		0x000000, //Black
-        //0x00FFFF, //pink
-        //0xFFFF00, //yellow
-        //0xFF00FF, //light blue
+        //0x00FFFF, //Pink
+        //0xFFFF00, //Yellow
+        //0xFF00FF, //Light blue
     }
 )
 
 func main() {
-    defer ws2811.Fini()
-    err := ws2811.Init(pin, count, brightness)
-    if err != nil {
-        fmt.Println(err)
-    } else {
-        gen := genLedSet()
-        for {
-            set := gen()
-            for i, c := range set {
-                if i == count {
-                    break
-                }
-                ws2811.SetLed(i, c)
-            }
-            err := ws2811.Render()
-            if err != nil {
-                ws2811.Clear()
-            }
-            time.Sleep(interval)
-        }
-    }
+	defer ws2811.Fini()
+	err := ws2811.Init(pin, count, brightness)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Press Ctr-C to quit.")
+
+		wipe = initLeds()
+		fmt.Println("Initialize color wipe")
+
+		err = colorWipe2(wipe)
+
+		err := ws2811.Render()
+		if err != nil {
+			ws2811.Clear()
+			fmt.Println("Error during wipe " + err.Error())
+			os.Exit(-1)
+		}
+
+		time.Sleep(interval)
+	}
 }
 
 func color() func() uint32 {
@@ -86,4 +87,29 @@ func genLedSet() func() []uint32 {
         base++
         return vled
     }
+}
+
+func initLeds() []uint32 {
+    return make([]uint32, count)
+}
+
+func colorWipe2(wipe []uint32) {
+	for i := 0; i < count; i++ {
+		ws2811.SetLed(i, wipe[i])
+	}
+}
+
+func colorWipe(color uint32) error {
+	for i := 0; i < count; i++ {
+		ws2811.SetLed(i, color)
+		err := ws2811.Render()
+		if err != nil {
+			ws2811.Clear()
+			return err
+		}
+
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	return nil
 }
