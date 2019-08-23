@@ -37,10 +37,14 @@ func main() {
 	} else {
 		fmt.Println("Press Ctr-C to quit.")
 
-		wipe = initLeds()
+		wipe := initLeds()
 		fmt.Println("Initialize color wipe")
 
-		err = colorWipe2(wipe)
+		wipe[0] = colors[0]
+		wipe[1] = colors[1]
+		wipe[2] = colors[2]
+		wipe[3] = colors[3]
+		colorWipe2(wipe)
 
 		err := ws2811.Render()
 		if err != nil {
