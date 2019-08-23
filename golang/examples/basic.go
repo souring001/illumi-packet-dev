@@ -67,17 +67,14 @@ func main() {
 			wipe[3] = colors[(3+idx)%4]
 			idx += 1
 			colorWipe2(wipe)
+			err := ws2811.Render()
+			if err != nil {
+				ws2811.Clear()
+				fmt.Println("Error during wipe " + err.Error())
+				os.Exit(-1)
+			}
 	    }
-
-
-
-		err := ws2811.Render()
-		if err != nil {
-			ws2811.Clear()
-			fmt.Println("Error during wipe " + err.Error())
-			os.Exit(-1)
-		}
-
+		
 		time.Sleep(interval)
 	}
 }
