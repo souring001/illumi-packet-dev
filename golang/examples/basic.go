@@ -26,16 +26,16 @@ var (
         0x00FF00, //Red
         0x0000FF, //Blue
 		0x000000, //Black
-        //0x00FFFF, //Pink
-        //0xFFFF00, //Yellow
-        //0xFF00FF, //Light blue
+        0x00FFFF, //Pink
+        0xFFFF00, //Yellow
+        0xFF00FF, //Light blue
     }
 
 	device       string = "eth0"
     snapshot_len int32  = 1024
     promiscuous  bool   = false
     err          error
-    timeout      time.Duration = 1 * time.Second
+    timeout      time.Duration = 250 * time.Millisecond
     handle       *pcap.Handle
 	idx = 1
 )
@@ -61,11 +61,12 @@ func main() {
 	    for packet := range packetSource.Packets() {
 	        // Process packet here
 	        fmt.Println(packet)
-			wipe[0] = colors[(0+idx)%4]
-			wipe[1] = colors[(1+idx)%4]
-			wipe[2] = colors[(2+idx)%4]
-			wipe[3] = colors[(3+idx)%4]
+
+			for i := 0; i < count; i++{
+				wipe[i] = colors[(i+idx)%4]
+			}
 			idx += 1
+
 			colorWipe2(wipe)
 			err := ws2811.Render()
 			if err != nil {
@@ -74,7 +75,7 @@ func main() {
 				os.Exit(-1)
 			}
 	    }
-		
+
 		time.Sleep(interval)
 	}
 }
