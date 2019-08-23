@@ -3,9 +3,12 @@ package main
 import (
     "fmt"
     "time"
+	"log"
 	"os"
 
     "github.com/jgarff/rpi_ws281x/golang/ws2811"
+	"github.com/google/gopacket"
+    "github.com/google/gopacket/pcap"
 )
 
 const (
@@ -27,9 +30,22 @@ var (
         //0xFFFF00, //Yellow
         //0xFF00FF, //Light blue
     }
+
+	device       string = "eth0"
+    snapshot_len int32  = 1024
+    promiscuous  bool   = false
+    err          error
+    timeout      time.Duration = 1 * time.Second
+    handle       *pcap.Handle
+	idx = 1
 )
 
 func main() {
+	// Open device
+    handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
+    if err != nil {log.Fatal(err) }
+    defer handle.Close()
+
 	defer ws2811.Fini()
 	err := ws2811.Init(pin, count, brightness)
 	if err != nil {
@@ -40,11 +56,20 @@ func main() {
 		wipe := initLeds()
 		fmt.Println("Initialize color wipe")
 
-		wipe[0] = colors[0]
-		wipe[1] = colors[1]
-		wipe[2] = colors[2]
-		wipe[3] = colors[3]
-		colorWipe2(wipe)
+		// Use the handle as a packet source to process all packets
+	    packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+	    for packet := range packetSource.Packets() {
+	        // Process packet here
+	        fmt.Println(packet)
+			wipe[0] = colors[(0+idx)%4]
+			wipe[1] = colors[(1+idx)%4]
+			wipe[2] = colors[(2+idx)%4]
+			wipe[3] = colors[(3+idx)%4]
+			idx += 1
+			colorWipe2(wipe)
+	    }
+
+
 
 		err := ws2811.Render()
 		if err != nil {
