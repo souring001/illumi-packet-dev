@@ -62,18 +62,34 @@ func main() {
 	        // Process packet here
 	        fmt.Println(packet)
 
-			for i := 0; i < count; i++{
-				wipe = initLeds()
-				wipe[i] = colors[0]
+			if idx%2==0 {
+				for i := 0; i < count; i++{
+					wipe = initLeds()
+					wipe[i] = colors[7]
 
-				colorWipe2(wipe)
-				err := ws2811.Render()
-				if err != nil {
-					ws2811.Clear()
-					fmt.Println("Error during wipe " + err.Error())
-					os.Exit(-1)
+					colorWipe2(wipe)
+					err := ws2811.Render()
+					if err != nil {
+						ws2811.Clear()
+						fmt.Println("Error during wipe " + err.Error())
+						os.Exit(-1)
+					}
+				}
+			} else {
+				for i := count-1; i >= 0 ; i--{
+					wipe = initLeds()
+					wipe[i] = colors[7]
+
+					colorWipe2(wipe)
+					err := ws2811.Render()
+					if err != nil {
+						ws2811.Clear()
+						fmt.Println("Error during wipe " + err.Error())
+						os.Exit(-1)
+					}
 				}
 			}
+
 			idx += 1
 	    }
 
