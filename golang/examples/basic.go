@@ -3,11 +3,11 @@ package main
 import (
     "fmt"
     "time"
-	"log"
-	"os"
+    "log"
+    "os"
 
     "github.com/jgarff/rpi_ws281x/golang/ws2811"
-	"github.com/google/gopacket"
+    "github.com/google/gopacket"
     "github.com/google/gopacket/pcap"
 )
 
@@ -25,19 +25,19 @@ var (
         0xFF0000, //Green
         0x00FF00, //Red
         0x0000FF, //Blue
-		0x000000, //Black
+        0x000000, //Black
         0x00FFFF, //Pink
         0xFFFF00, //Yellow
         0xFF00FF, //Light blue
     }
 
-	device       string = "eth0"
+    device       string = "eth0"
     snapshot_len int32  = 1024
     promiscuous  bool   = false
     err          error
     timeout      time.Duration = 250 * time.Millisecond
     handle       *pcap.Handle
-	idx = 1
+    idx = 1
 )
 
 func main() {
@@ -46,54 +46,52 @@ func main() {
     if err != nil {log.Fatal(err) }
     defer handle.Close()
 
-	defer ws2811.Fini()
-	err := ws2811.Init(pin, count, brightness)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("Press Ctr-C to quit.")
+    defer ws2811.Fini()
+    err := ws2811.Init(pin, count, brightness)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Println("Press Ctr-C to quit.")
 
-		wipe := initLeds()
-		fmt.Println("Initialize color wipe")
+        wipe := initLeds()
+        fmt.Println("Initialize color wipe")
 
-		// Use the handle as a packet source to process all packets
-	    packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
-	    for packet := range packetSource.Packets() {
-	        // Process packet here
-	        fmt.Println(packet)
+        // Use the handle as a packet source to process all packets
+        packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+        for packet := range packetSource.Packets() {
+            // Process packet here
+            fmt.Println(packet)
 
-			if idx%2==0 {
-				for i := 0; i < count; i++{
-					wipe = initLeds()
-					wipe[i] = colors[7]
+            if idx%2==0 {
+                for i := 0; i < count; i++{
+    				wipe = initLeds()
+    				wipe[i] = colors[7]
 
-					colorWipe2(wipe)
-					err := ws2811.Render()
-					if err != nil {
-						ws2811.Clear()
-						fmt.Println("Error during wipe " + err.Error())
-						os.Exit(-1)
-					}
-				}
-			} else {
-				for i := count-1; i >= 0 ; i--{
-					wipe = initLeds()
-					wipe[i] = colors[7]
+    				colorWipe2(wipe)
+    				err := ws2811.Render()
+    				if err != nil {
+    					ws2811.Clear()
+    					fmt.Println("Error during wipe " + err.Error())
+    					os.Exit(-1)
+    				}
+    			}
+    		} else {
+    			for i := count-1; i >= 0 ; i--{
+    				wipe = initLeds()
+    				wipe[i] = colors[7]
 
-					colorWipe2(wipe)
-					err := ws2811.Render()
-					if err != nil {
-						ws2811.Clear()
-						fmt.Println("Error during wipe " + err.Error())
-						os.Exit(-1)
-					}
-				}
-			}
-
-			idx += 1
-	    }
-
-		time.Sleep(interval)
+    				colorWipe2(wipe)
+    				err := ws2811.Render()
+    				if err != nil {
+    					ws2811.Clear()
+    					fmt.Println("Error during wipe " + err.Error())
+    					os.Exit(-1)
+    				}
+    			}
+    		}
+    		idx += 1
+        }
+        time.Sleep(interval)
 	}
 }
 
