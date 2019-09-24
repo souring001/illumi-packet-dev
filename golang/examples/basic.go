@@ -145,7 +145,7 @@ func initLeds(led []uint32) {
 }
 
 func castPacket(led []uint32, k int, color uint32,reverse bool) {
-    for i := -(k-1); i < len(led)+series; i += speed {
+    for i := -(k-1); i < len(led)+series+speed; i += speed {
         initLeds(led)
 
         for j := 0; j < k; j++ {
