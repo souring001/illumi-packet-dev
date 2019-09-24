@@ -72,7 +72,7 @@ func main() {
                 // if !((isSrc && !isDst) || (!isSrc && isDst)) {
                 //     fmt.Println("src:", src, isSrc, "\tdst:", dst, isDst)
                 // }
-                fmt.Printf("src:", src)
+                fmt.Printf("src:", src.String())
                 if isSrc {
                     reverse = false
                 }
@@ -81,7 +81,7 @@ func main() {
                 } else {
                     fmt.Println("\t->")
                 }
-                fmt.Printf("\tdst:", dst)
+                fmt.Printf("\tdst:", dst.String())
             }
             fmt.Println(packet)
             castPacket(led, series, reverse)
@@ -107,6 +107,7 @@ func castPacket(led []uint32, k int, reverse bool) {
 
         for j := 0; j < k; j++ {
             if t := i + j; 0 <= t && t < len(led) {
+                // packet gradiation
                 c := colors[0]
                 g := (((c & 0xFF0000) >> 16) * uint32(j+1) / uint32(k)) << 16
                 r := (((c & 0x00FF00) >> 8)* uint32(j+1) / uint32(k)) << 8
