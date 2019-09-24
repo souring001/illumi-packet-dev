@@ -168,7 +168,7 @@ func castPacket(led []uint32, k int, reverse bool) {
 
         for j := 0; j < k; j++ {
             if t := i + j; 0 <= t && t < len(led) {
-                led[t] = uint32(colors[0] * (j+1) / k)
+                led[t] = colors[0] * uint32(j+1) / uint32(k)
             }
         }
 
