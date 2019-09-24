@@ -66,7 +66,7 @@ func main() {
 
             reverse := true
             if net := packet.NetworkLayer(); net != nil {
-              src, dst := net.NetworkFlow().Endpoints()
+              // src, dst := net.NetworkFlow().Endpoints()
               src, _ := net.NetworkFlow().Endpoints()
               isSrc := strings.Contains(src.String(), ipAddr)s
               // isDst := strings.Contains(dst.String(), ipAddr)
