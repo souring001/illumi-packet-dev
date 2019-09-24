@@ -18,7 +18,7 @@ const (
     device     = "eth0"
     pin        = 18
     series     = 12
-    speed      = 4
+    speed      = 12
     count      = 144
     brightness = 50 // default 255
 )
@@ -129,6 +129,7 @@ func main() {
                 fmt.Println("OTHERS")
                 castPacket(led, series, colors[0], reverse)
             }
+            fmt.println(len())
         }
     }
 }
