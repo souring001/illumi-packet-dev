@@ -80,11 +80,11 @@ func main() {
                     reverse = false
                 }
                 if reverse {
-                    fmt.Println("\t<-")
+                    fmt.Printf("\t<-")
                 } else {
-                    fmt.Println("\t->")
+                    fmt.Printf("\t->")
                 }
-                fmt.Printf("\tdst:", dst)
+                fmt.Println("\tdst:", dst)
             }
             // fmt.Println(packet)
             if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
