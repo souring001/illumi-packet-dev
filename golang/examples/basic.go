@@ -14,7 +14,7 @@ import (
 const (
     pin        = 18
     series     = 4
-    count      = 60
+    count      = 144
     brightness = 50
     interval   = time.Millisecond * 50
 )
@@ -41,7 +41,7 @@ var (
 )
 
 func main() {
-	// Open device
+    // Open device
     handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
     if err != nil {log.Fatal(err) }
     defer handle.Close()
