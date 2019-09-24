@@ -125,6 +125,6 @@ func castPacket(led []uint32, k int, reverse bool) {
 
 func setLeds(led []uint32) {
 	for i := 0; i < count; i++ {
-		ws2811.SetLed(i, wipe[i])
+		ws2811.SetLed(i, led[i])
 	}
 }
