@@ -26,12 +26,12 @@ const (
 var (
     colors = []uint32{
         0xFFFFFF, //0 White others
-        0x880000, //1 Green UDP
+        0x880000, //1 Green
         0x00FF00, //2 Red
-        0x0000FF, //3 Blue UDP
+        0x0000FF, //3 Blue
         0x000000, //4 Purple ARP
         0x00FFFF, //5 Pink ICMP
-        0xFFFF00, //6 Yellow
+        0xFFFF00, //6 Yellow UDP
         0x88FF00, //7 Orange IGMP
         0xFF00FF, //8 Cyan DHCP
         0xFF0000, //9 Lime DNS
@@ -117,7 +117,7 @@ func main() {
                 fmt.Println(packet)
             }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil {
                 fmt.Println("UDP")
-                castPacket(led, series, colors[1], reverse)
+                castPacket(led, series, colors[6], reverse)
                 fmt.Println(packet)
             }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil {
                 // fmt.Println("TCP")
