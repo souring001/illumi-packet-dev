@@ -81,6 +81,7 @@ func main() {
                     fmt.Println("->")
                 }
             }
+            fmt.Println(packet)
             castPacket(led, series, reverse)
         }
     }
