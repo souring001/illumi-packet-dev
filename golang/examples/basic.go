@@ -2,6 +2,7 @@ package main
 
 import (
     "fmt"
+    "strings"
     "time"
     "log"
     "os"
@@ -12,11 +13,13 @@ import (
 )
 
 const (
+    ipAddr     = "169.254.204.201"
+    device     = "eth0"
     pin        = 18
-    series     = 4
+    series     = 5
     count      = 144
     brightness = 50
-    interval   = time.Millisecond * 50
+    // interval   = time.Millisecond * 50
 )
 
 var (
@@ -31,13 +34,11 @@ var (
         0xFF00FF, //Light blue
     }
 
-    device       string = "eth0"
     snapshot_len int32  = 1024
     promiscuous  bool   = false
     err          error
-    timeout      time.Duration = 250 * time.Millisecond
+    timeout      time.Duration = 50 * time.Millisecond
     handle       *pcap.Handle
-    idx = 1
 )
 
 func main() {
@@ -53,45 +54,63 @@ func main() {
     } else {
         fmt.Println("Press Ctr-C to quit.")
 
-        wipe := initLeds()
-        fmt.Println("Initialize color wipe")
+        led := make([]uint32, count)
+        fmt.Println("Initialize color leds")
 
         // Use the handle as a packet source to process all packets
         packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+        fmt.Println("start capturing...")
+
         for packet := range packetSource.Packets() {
             // Process packet here
-            fmt.Println(packet)
 
-            if idx%2==0 {
-                for i := 0; i < count; i++{
-                    wipe = initLeds()
-                    wipe[i] = colors[7]
-
-                    colorWipe2(wipe)
-                    err := ws2811.Render()
-                    if err != nil {
-                    	ws2811.Clear()
-                    	fmt.Println("Error during wipe " + err.Error())
-                    	os.Exit(-1)
-                    }
-                }
-            } else {
-                for i := count-1; i >= 0 ; i--{
-                    wipe = initLeds()
-                    wipe[i] = colors[7]
-
-                    colorWipe2(wipe)
-                    err := ws2811.Render()
-                    if err != nil {
-                        ws2811.Clear()
-                        fmt.Println("Error during wipe " + err.Error())
-                        os.Exit(-1)
-                    }
-                }
+            reverse := true
+            if net := packet.NetworkLayer(); net != nil {
+              src, dst := net.NetworkFlow().Endpoints()
+              src, _ := net.NetworkFlow().Endpoints()
+              isSrc := strings.Contains(src.String(), ipAddr)s
+              // isDst := strings.Contains(dst.String(), ipAddr)
+              // if !((isSrc && !isDst) || (!isSrc && isDst)) {
+              //     fmt.Println("src:", src, isSrc, "\tdst:", dst, isDst)
+              // }
+              // fmt.Println("src:", src, isSrc, "\tdst:", dst, isDst)
+              if isSrc {
+                  reverse = false
+              }
             }
-            idx += 1
+
+            castPacket(led, series, reverse)
+
+            // if idx%2==0 {
+            //     for i := 0; i < count; i++{
+            //         wipe = initLeds()
+            //         wipe[i] = colors[7]
+            //
+            //         colorWipe2(wipe)
+            //         err := ws2811.Render()
+            //         if err != nil {
+            //         	ws2811.Clear()
+            //         	fmt.Println("Error during wipe " + err.Error())
+            //         	os.Exit(-1)
+            //         }
+            //     }
+            // } else {
+            //     for i := count-1; i >= 0 ; i--{
+            //         wipe = initLeds()
+            //         wipe[i] = colors[7]
+            //
+            //         colorWipe2(wipe)
+            //         err := ws2811.Render()
+            //         if err != nil {
+            //             ws2811.Clear()
+            //             fmt.Println("Error during wipe " + err.Error())
+            //             os.Exit(-1)
+            //         }
+            //     }
+            // }
+            // idx += 1
         }
-        time.Sleep(interval)
+        // time.Sleep(interval)
     }
 }
 
@@ -131,8 +150,40 @@ func genLedSet() func() []uint32 {
     }
 }
 
-func initLeds() []uint32 {
-    return make([]uint32, count)
+func reverseLeds(led []uint32) {
+    for i, j := 0, len(led)-1; i < j; i, j = i+1, j-1 {
+        led[i], led[j] = led[j], led[i]
+    }
+}
+
+func initLeds(led []uint32) {
+    for i, _ := range led {
+        led[i] = 0
+    }
+}
+
+func castPacket(led []uint32, k int, reverse bool) {
+    for i := -(k-1); i < len(led)+1; i++ {
+        initLed(led)
+
+        for j := 0; j < k; j++ {
+            if t := i + j; 0 <= t && t < len(led) {
+                led[t] = uint32(colors[0] * (j+1) / k)
+            }
+        }
+
+        if reverse {
+            reverseLed(led)
+        }
+
+        colorWipe2(led)
+        err := ws2811.Render()
+        if err != nil {
+            ws2811.Clear()
+            fmt.Println("Error during wipe " + err.Error())
+            os.Exit(-1)
+        }
+    }
 }
 
 func colorWipe2(wipe []uint32) {
