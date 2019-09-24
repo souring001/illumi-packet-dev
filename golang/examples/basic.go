@@ -88,43 +88,43 @@ func main() {
             // fmt.Println(packet)
             if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
                 fmt.Println("LLDP")
-                castPacket(led, series, color[0], reverse)
+                castPacket(led, series, colors[0], reverse)
                 fmt.Println(packet)
             }else if dns := packet.Layer(layers.LayerTypeDNS); dns != nil {
                 fmt.Println("DNS")
-                castPacket(led, series, color[9], reverse)
+                castPacket(led, series, colors[9], reverse)
                 fmt.Println(packet)
             }else if icmpv4 := packet.Layer(layers.LayerTypeICMPv4); icmpv4 != nil {
                 fmt.Println("ICMPv4")
-                castPacket(led, series, color[5], reverse)
+                castPacket(led, series, colors[5], reverse)
                 fmt.Println(packet)
             }else if icmpv6 := packet.Layer(layers.LayerTypeICMPv6); icmpv6 != nil {
                 fmt.Println("ICMPv6")
-                castPacket(led, series, color[5], reverse)
+                castPacket(led, series, colors[5], reverse)
                 fmt.Println(packet)
             }else if dhcpv4 := packet.Layer(layers.LayerTypeDHCPv4); dhcpv4 != nil {
                 fmt.Println("DHCPv4")
-                castPacket(led, series, color[8], reverse)
+                castPacket(led, series, colors[8], reverse)
                 fmt.Println(packet)
             }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil {
                 fmt.Println("ARP")
-                castPacket(led, series, color[4], reverse)
+                castPacket(led, series, colors[4], reverse)
                 fmt.Println(packet)
             }else if igmp := packet.Layer(layers.LayerTypeIGMP); igmp != nil {
                 fmt.Println("IGMP")
-                castPacket(led, series, color[7], reverse)
+                castPacket(led, series, colors[7], reverse)
                 fmt.Println(packet)
             }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil {
                 fmt.Println("UDP")
-                castPacket(led, series, color[1], reverse)
+                castPacket(led, series, colors[1], reverse)
                 fmt.Println(packet)
             }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil {
                 // fmt.Println("TCP")
-                // castPacket(led, series, color[0], reverse)
+                // castPacket(led, series, colors[0], reverse)
                 // fmt.Println(packet)
             }else{
                 fmt.Println("OTHERS")
-                castPacket(led, series, color[0], reverse)
+                castPacket(led, series, colors[0], reverse)
                 fmt.Println(packet)
             }
         }
