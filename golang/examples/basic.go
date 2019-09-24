@@ -18,7 +18,7 @@ const (
     device     = "eth0"
     pin        = 18
     series     = 12
-    speed      = 12
+    speed      = 1
     count      = 144
     brightness = 50 // default 255
 )
@@ -81,8 +81,10 @@ func main() {
                     reverse = false
                 }
                 if reverse {
+                    // router -> Me
                     fmt.Printf("\t->")
                 } else {
+                    // Me <- router
                     fmt.Printf("\t<-")
                 }
                 fmt.Println("\tdst:", dst)
