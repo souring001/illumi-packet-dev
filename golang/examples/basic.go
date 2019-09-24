@@ -81,9 +81,9 @@ func main() {
                     reverse = false
                 }
                 if reverse {
-                    fmt.Printf("\t<-")
-                } else {
                     fmt.Printf("\t->")
+                } else {
+                    fmt.Printf("\t<-")
                 }
                 fmt.Println("\tdst:", dst)
             }
@@ -121,9 +121,9 @@ func main() {
                 fmt.Println("UDP")
                 castPacket(led, series, colors[6], reverse)
             }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil {
-                fmt.Println(packet)
+                // fmt.Println(packet)
                 fmt.Println("TCP")
-                castPacket(led, series, colors[3], reverse)
+                // castPacket(led, series, colors[3], reverse)
             }else{
                 fmt.Println(packet)
                 fmt.Println("OTHERS")
