@@ -30,8 +30,8 @@ var (
         0x880000, //1 Green
         0x00FF00, //2 Red
         0x0000FF, //3 Blue TCP
-        0x0099cc, //4 Purple ARP
-        0x33FFcc, //5 Pink ICMP
+        0x0066cc, //4 Purple ARP
+        0x33FF99, //5 Pink ICMP
         0xFFFF00, //6 Yellow UDP
         0x88FF00, //7 Orange IGMP
         0xFF00FF, //8 Cyan DHCP
