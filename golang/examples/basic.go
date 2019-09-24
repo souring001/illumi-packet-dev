@@ -25,12 +25,13 @@ const (
 
 var (
     colors = []uint32{
+        // grb
         0xFFFFFF, //0 White others
         0x880000, //1 Green
         0x00FF00, //2 Red
         0x0000FF, //3 Blue TCP
-        0x000000, //4 Purple ARP
-        0x00FFFF, //5 Pink ICMP
+        0x0099cc, //4 Purple ARP
+        0x33FFcc, //5 Pink ICMP
         0xFFFF00, //6 Yellow UDP
         0x88FF00, //7 Orange IGMP
         0xFF00FF, //8 Cyan DHCP
