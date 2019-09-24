@@ -24,14 +24,16 @@ const (
 
 var (
     colors = []uint32{
-        0xFFFFFF, //White
-        0xFF0000, //Green
-        0x00FF00, //Red
-        0x0000FF, //Blue
-        0x000000, //Black
-        0x00FFFF, //Pink
-        0xFFFF00, //Yellow
-        0xFF00FF, //Light blue
+        0xFFFFFF, //0 White others
+        0x880000, //1 Green UDP
+        0x00FF00, //2 Red
+        0x0000FF, //3 Blue UDP
+        0x000000, //4 Purple ARP
+        0x00FFFF, //5 Pink ICMP
+        0xFFFF00, //6 Yellow
+        0x88FF00, //7 Orange IGMP
+        0xFF00FF, //8 Cyan DHCP
+        0xFF0000, //9 Lime DNS
     }
 
     snapshot_len int32  = 1024
@@ -72,7 +74,7 @@ func main() {
                 // if !((isSrc && !isDst) || (!isSrc && isDst)) {
                 //     fmt.Println("src:", src, isSrc, "\tdst:", dst, isDst)
                 // }
-                fmt.Printf("src:", src.String())
+                fmt.Printf("src:", src)
                 if isSrc {
                     reverse = false
                 }
@@ -81,10 +83,50 @@ func main() {
                 } else {
                     fmt.Println("\t->")
                 }
-                fmt.Printf("\tdst:", dst.String())
+                fmt.Printf("\tdst:", dst)
             }
-            fmt.Println(packet)
-            castPacket(led, series, reverse)
+            // fmt.Println(packet)
+            if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
+                fmt.Println("LLDP")
+                castPacket(led, series, color[0], reverse)
+                fmt.Println(packet)
+            }else if dns := packet.Layer(layers.LayerTypeDNS); dns != nil {
+                fmt.Println("DNS")
+                castPacket(led, series, color[9], reverse)
+                fmt.Println(packet)
+            }else if icmpv4 := packet.Layer(layers.LayerTypeICMPv4); icmpv4 != nil {
+                fmt.Println("ICMPv4")
+                castPacket(led, series, color[5], reverse)
+                fmt.Println(packet)
+            }else if icmpv6 := packet.Layer(layers.LayerTypeICMPv6); icmpv6 != nil {
+                fmt.Println("ICMPv6")
+                castPacket(led, series, color[5], reverse)
+                fmt.Println(packet)
+            }else if dhcpv4 := packet.Layer(layers.LayerTypeDHCPv4); dhcpv4 != nil {
+                fmt.Println("DHCPv4")
+                castPacket(led, series, color[8], reverse)
+                fmt.Println(packet)
+            }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil {
+                fmt.Println("ARP")
+                castPacket(led, series, color[4], reverse)
+                fmt.Println(packet)
+            }else if igmp := packet.Layer(layers.LayerTypeIGMP); igmp != nil {
+                fmt.Println("IGMP")
+                castPacket(led, series, color[7], reverse)
+                fmt.Println(packet)
+            }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil {
+                fmt.Println("UDP")
+                castPacket(led, series, color[1], reverse)
+                fmt.Println(packet)
+            }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil {
+                // fmt.Println("TCP")
+                // castPacket(led, series, color[0], reverse)
+                // fmt.Println(packet)
+            }else{
+                fmt.Println("OTHERS")
+                castPacket(led, series, color[0], reverse)
+                fmt.Println(packet)
+            }
         }
     }
 }
@@ -101,17 +143,16 @@ func initLeds(led []uint32) {
     }
 }
 
-func castPacket(led []uint32, k int, reverse bool) {
-    for i := -(k-1); i < len(led)-series; i += speed {
+func castPacket(led []uint32, k int, color uint32,reverse bool) {
+    for i := -(k-1); i < len(led)+series; i += speed {
         initLeds(led)
 
         for j := 0; j < k; j++ {
             if t := i + j; 0 <= t && t < len(led) {
                 // packet gradiation
-                c := colors[0]
-                g := (((c & 0xFF0000) >> 16) * uint32(j+1) / uint32(k)) << 16
-                r := (((c & 0x00FF00) >> 8)* uint32(j+1) / uint32(k)) << 8
-                b := (c & 0x0000FF)* uint32(j+1) / uint32(k)
+                g := (((color & 0xFF0000) >> 16) * uint32(j+1) / uint32(k)) << 16
+                r := (((color & 0x00FF00) >> 8)* uint32(j+1) / uint32(k)) << 8
+                b := (color & 0x0000FF)* uint32(j+1) / uint32(k)
                 led[t] = g|r|b
             }
         }
