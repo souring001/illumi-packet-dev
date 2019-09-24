@@ -129,7 +129,6 @@ func main() {
                 fmt.Println("OTHERS")
                 castPacket(led, series, colors[0], reverse)
             }
-            fmt.println(len())
         }
     }
 }
