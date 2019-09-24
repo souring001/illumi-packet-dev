@@ -17,6 +17,7 @@ const (
     device     = "eth0"
     pin        = 18
     series     = 12
+    speed      = 4
     count      = 144
     brightness = 50 // default 255
 )
@@ -101,7 +102,7 @@ func initLeds(led []uint32) {
 }
 
 func castPacket(led []uint32, k int, reverse bool) {
-    for i := -(k-1); i < len(led)+1; i += series {
+    for i := -(k-1); i < len(led)+1; i += speed {
         initLeds(led)
 
         for j := 0; j < k; j++ {
