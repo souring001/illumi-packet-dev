@@ -18,8 +18,7 @@ const (
     pin        = 18
     series     = 5
     count      = 144
-    brightness = 50
-    // interval   = time.Millisecond * 50
+    brightness = 255
 )
 
 var (
@@ -66,87 +65,24 @@ func main() {
 
             reverse := true
             if net := packet.NetworkLayer(); net != nil {
-              // src, dst := net.NetworkFlow().Endpoints()
-              src, _ := net.NetworkFlow().Endpoints()
-              isSrc := strings.Contains(src.String(), ipAddr)
-              // isDst := strings.Contains(dst.String(), ipAddr)
-              // if !((isSrc && !isDst) || (!isSrc && isDst)) {
-              //     fmt.Println("src:", src, isSrc, "\tdst:", dst, isDst)
-              // }
-              // fmt.Println("src:", src, isSrc, "\tdst:", dst, isDst)
-              if isSrc {
-                  reverse = false
-              }
+                src, dst := net.NetworkFlow().Endpoints()
+                isSrc := strings.Contains(src.String(), ipAddr)
+                // isDst := strings.Contains(dst.String(), ipAddr)
+                // if !((isSrc && !isDst) || (!isSrc && isDst)) {
+                //     fmt.Println("src:", src, isSrc, "\tdst:", dst, isDst)
+                // }
+                fmt.Println("src:", src, "\tdst:", dst)
+                if isSrc {
+                    reverse = false
+                }
+                if reverse {
+                    fmt.Println("<-")
+                } else {
+                    fmt.Println("->")
+                }
             }
-
             castPacket(led, series, reverse)
-
-            // if idx%2==0 {
-            //     for i := 0; i < count; i++{
-            //         wipe = initLeds()
-            //         wipe[i] = colors[7]
-            //
-            //         colorWipe2(wipe)
-            //         err := ws2811.Render()
-            //         if err != nil {
-            //         	ws2811.Clear()
-            //         	fmt.Println("Error during wipe " + err.Error())
-            //         	os.Exit(-1)
-            //         }
-            //     }
-            // } else {
-            //     for i := count-1; i >= 0 ; i--{
-            //         wipe = initLeds()
-            //         wipe[i] = colors[7]
-            //
-            //         colorWipe2(wipe)
-            //         err := ws2811.Render()
-            //         if err != nil {
-            //             ws2811.Clear()
-            //             fmt.Println("Error during wipe " + err.Error())
-            //             os.Exit(-1)
-            //         }
-            //     }
-            // }
-            // idx += 1
         }
-        // time.Sleep(interval)
-    }
-}
-
-func color() func() uint32 {
-    i := -1
-    return func() uint32 {
-        i++
-        return colors[i%len(colors)]
-    }
-}
-
-func vLeds() []uint32 {
-    alength := series * len(colors)
-    for {
-        if alength >= count {
-            break
-        }
-        alength += alength
-    }
-    return make([]uint32, alength)
-}
-
-func genLedSet() func() []uint32 {
-    color := color()
-    base := 0
-    return func() []uint32 {
-        vled := vLeds()
-        for i := base; i < base+len(vled); {
-            color := color()
-            for j := 0; j < series; j++ {
-                vled[i%len(vled)] = color
-                i++
-            }
-        }
-        base++
-        return vled
     }
 }
 
@@ -176,7 +112,7 @@ func castPacket(led []uint32, k int, reverse bool) {
             reverseLeds(led)
         }
 
-        colorWipe2(led)
+        setLeds(led)
         err := ws2811.Render()
         if err != nil {
             ws2811.Clear()
@@ -186,23 +122,8 @@ func castPacket(led []uint32, k int, reverse bool) {
     }
 }
 
-func colorWipe2(wipe []uint32) {
+func setLeds(led []uint32) {
 	for i := 0; i < count; i++ {
 		ws2811.SetLed(i, wipe[i])
 	}
-}
-
-func colorWipe(color uint32) error {
-	for i := 0; i < count; i++ {
-		ws2811.SetLed(i, color)
-		err := ws2811.Render()
-		if err != nil {
-			ws2811.Clear()
-			return err
-		}
-
-		time.Sleep(50 * time.Millisecond)
-	}
-
-	return nil
 }
