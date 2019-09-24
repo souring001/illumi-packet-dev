@@ -68,7 +68,7 @@ func main() {
             if net := packet.NetworkLayer(); net != nil {
               // src, dst := net.NetworkFlow().Endpoints()
               src, _ := net.NetworkFlow().Endpoints()
-              isSrc := strings.Contains(src.String(), ipAddr)s
+              isSrc := strings.Contains(src.String(), ipAddr)
               // isDst := strings.Contains(dst.String(), ipAddr)
               // if !((isSrc && !isDst) || (!isSrc && isDst)) {
               //     fmt.Println("src:", src, isSrc, "\tdst:", dst, isDst)
