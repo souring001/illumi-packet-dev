@@ -10,6 +10,7 @@ import (
     "github.com/jgarff/rpi_ws281x/golang/ws2811"
     "github.com/google/gopacket"
     "github.com/google/gopacket/pcap"
+    "github.com/google/gopacket/layers"
 )
 
 const (
