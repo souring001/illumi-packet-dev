@@ -16,9 +16,9 @@ const (
     ipAddr     = "169.254.204.201"
     device     = "eth0"
     pin        = 18
-    series     = 5
+    series     = 12
     count      = 144
-    brightness = 255
+    brightness = 50 // default 255
 )
 
 var (
@@ -71,15 +71,16 @@ func main() {
                 // if !((isSrc && !isDst) || (!isSrc && isDst)) {
                 //     fmt.Println("src:", src, isSrc, "\tdst:", dst, isDst)
                 // }
-                fmt.Println("src:", src, "\tdst:", dst)
+                fmt.Printf("src:", src)
                 if isSrc {
                     reverse = false
                 }
                 if reverse {
-                    fmt.Println("<-")
+                    fmt.Println("\t<-")
                 } else {
-                    fmt.Println("->")
+                    fmt.Println("\t->")
                 }
+                fmt.Printf("\tdst:", dst)
             }
             fmt.Println(packet)
             castPacket(led, series, reverse)
@@ -100,7 +101,7 @@ func initLeds(led []uint32) {
 }
 
 func castPacket(led []uint32, k int, reverse bool) {
-    for i := -(k-1); i < len(led)+1; i++ {
+    for i := -(k-1); i < len(led)+1; i += series {
         initLeds(led)
 
         for j := 0; j < k; j++ {
