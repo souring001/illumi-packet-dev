@@ -164,7 +164,7 @@ func initLeds(led []uint32) {
 
 func castPacket(led []uint32, k int, reverse bool) {
     for i := -(k-1); i < len(led)+1; i++ {
-        initLed(led)
+        initLeds(led)
 
         for j := 0; j < k; j++ {
             if t := i + j; 0 <= t && t < len(led) {
@@ -173,7 +173,7 @@ func castPacket(led []uint32, k int, reverse bool) {
         }
 
         if reverse {
-            reverseLed(led)
+            reverseLeds(led)
         }
 
         colorWipe2(led)
