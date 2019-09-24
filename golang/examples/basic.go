@@ -40,7 +40,7 @@ var (
     snapshot_len int32  = 1024
     promiscuous  bool   = false
     err          error
-    timeout      time.Duration = 50 * time.Millisecond
+    timeout      time.Duration = 1 * time.Millisecond
     handle       *pcap.Handle
 )
 
