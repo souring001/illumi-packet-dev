@@ -14,11 +14,11 @@ import (
 )
 
 const (
-    ipAddr     = "169.254.204.201"
+    ipAddr     = "172.16.80.142"
     device     = "eth0"
     pin        = 18
     series     = 12
-    speed      = 1
+    speed      = 4
     count      = 144
     brightness = 50 // default 255
 )
