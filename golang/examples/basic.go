@@ -89,8 +89,12 @@ func main() {
                 }
                 fmt.Println("\tdst:", dst)
             }
-            // fmt.Println(packet)
-            if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
+
+            // Anomary detection
+            if isAnomaly(packet) {
+                fmt.Println("ANOMALY")
+                castPacket(led, series, colors[2], reverse)
+            }else if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
                 fmt.Println(packet)
                 fmt.Println("LLDP")
                 castPacket(led, series, colors[0], reverse)
@@ -179,4 +183,16 @@ func setLeds(led []uint32) {
 	for i := 0; i < count; i++ {
 		ws2811.SetLed(i, led[i])
 	}
+}
+
+func isAnomaly(packet gopacket.Packet) bool {
+    anml := false
+    if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil {
+        tcpl, _ := tcp.(*layers.TCP)
+        // Bool flags: FIN, SYN, RST, PSH, ACK, URG, ECE, CWR, NS
+        if tcpl.FIN && tcpl.URG && tcpl.PSH {
+            anml = true
+        }
+    }
+    return anml
 }
