@@ -2,11 +2,11 @@ package main
 
 import (
     "fmt"
+    "flag"
     "strings"
     "time"
     "log"
     "os"
-
     "github.com/jgarff/rpi_ws281x/golang/ws2811"
     "github.com/google/gopacket"
     "github.com/google/gopacket/pcap"
@@ -14,7 +14,8 @@ import (
 )
 
 const (
-    ipAddr     = "172.16.80.142"
+    ipAddr     = "172.16.81.4"
+    // ipAddr     = "169.254.204.201"
     device     = "eth0"
     pin        = 18
     series     = 12
@@ -37,7 +38,7 @@ var (
         0xFF00FF, //8 Cyan DHCP
         0xFF0000, //9 Lime DNS
     }
-
+    display             = flag.Bool("display", false, "display packet details")
     snapshot_len int32  = 1024
     promiscuous  bool   = false
     err          error
@@ -46,6 +47,7 @@ var (
 )
 
 func main() {
+    flag.Parse()
     // Open device
     handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
     if err != nil {log.Fatal(err) }
@@ -56,83 +58,107 @@ func main() {
     if err != nil {
         fmt.Println(err)
     } else {
-        fmt.Println("Press Ctr-C to quit.")
+        // fmt.Println("Press Ctr-C to quit.")
 
         led := make([]uint32, count)
-        fmt.Println("Initialize color leds")
+        // fmt.Println("Initialize color leds")
 
         // Use the handle as a packet source to process all packets
         packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
-        fmt.Println("start capturing...")
+        // fmt.Println("start capturing...")
 
         for packet := range packetSource.Packets() {
             // Process packet here
 
             reverse := true
             if net := packet.NetworkLayer(); net != nil {
-                src, dst := net.NetworkFlow().Endpoints()
+                // src, dst := net.NetworkFlow().Endpoints()
+                src, _ := net.NetworkFlow().Endpoints()
                 isSrc := strings.Contains(src.String(), ipAddr)
                 // isDst := strings.Contains(dst.String(), ipAddr)
                 // if !((isSrc && !isDst) || (!isSrc && isDst)) {
                 //     fmt.Println("src:", src, isSrc, "\tdst:", dst, isDst)
                 // }
-                fmt.Printf("src:", src)
+
+                // fmt.Printf("src:", src)
                 if isSrc {
                     reverse = false
                 }
                 if reverse {
                     // router -> Me
-                    fmt.Printf("\t->")
+                    // fmt.Printf("\t->")
                 } else {
                     // Me <- router
-                    fmt.Printf("\t<-")
+                    // fmt.Printf("\t<-")
                 }
-                fmt.Println("\tdst:", dst)
+                // fmt.Println("\tdst:", dst)
             }
 
             // Anomary detection
             if isAnomaly(packet) {
-                fmt.Println("ANOMALY")
+                if *display {
+                    fmt.Println("ANOMALY")
+                }
                 castPacket(led, series, colors[2], reverse)
             }else if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
-                fmt.Println(packet)
-                fmt.Println("LLDP")
+                if *display {
+                    fmt.Println(packet)
+                    fmt.Println("LLDP")
+                }
                 castPacket(led, series, colors[0], reverse)
             }else if dns := packet.Layer(layers.LayerTypeDNS); dns != nil {
-                fmt.Println(packet)
-                fmt.Println("DNS")
+                if *display {
+                    fmt.Println(packet)
+                    fmt.Println("DNS")
+                }
                 castPacket(led, series, colors[9], reverse)
             }else if icmpv4 := packet.Layer(layers.LayerTypeICMPv4); icmpv4 != nil {
-                fmt.Println(packet)
-                fmt.Println("ICMPv4")
+                if *display {
+                    fmt.Println(packet)
+                    fmt.Println("ICMPv4")
+                }
                 castPacket(led, series, colors[5], reverse)
             }else if icmpv6 := packet.Layer(layers.LayerTypeICMPv6); icmpv6 != nil {
-                fmt.Println(packet)
-                fmt.Println("ICMPv6")
+                if *display {
+                    fmt.Println(packet)
+                    fmt.Println("ICMPv6")
+                }
                 castPacket(led, series, colors[5], reverse)
             }else if dhcpv4 := packet.Layer(layers.LayerTypeDHCPv4); dhcpv4 != nil {
-                fmt.Println(packet)
-                fmt.Println("DHCPv4")
+                if *display {
+                    fmt.Println(packet)
+                    fmt.Println("DHCPv4")
+                }
                 castPacket(led, series, colors[8], reverse)
             }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil {
-                fmt.Println(packet)
-                fmt.Println("ARP")
-                castPacket(led, series, colors[4], reverse)
-            }else if igmp := packet.Layer(layers.LayerTypeIGMP); igmp != nil {
-                fmt.Println(packet)
-                fmt.Println("IGMP")
+                if *display {
+                    fmt.Println(packet)
+                    fmt.Println("ARP")
+                }
                 castPacket(led, series, colors[7], reverse)
+            }else if igmp := packet.Layer(layers.LayerTypeIGMP); igmp != nil {
+                if *display {
+                    fmt.Println(packet)
+                    fmt.Println("IGMP")
+                }
+                castPacket(led, series, colors[4], reverse)
             }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil {
-                fmt.Println(packet)
-                fmt.Println("UDP")
+                if *display {
+                    fmt.Println(packet)
+                    fmt.Println("UDP")
+                }
                 castPacket(led, series, colors[6], reverse)
             }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil {
-                // fmt.Println(packet)
-                fmt.Println("TCP")
-                // castPacket(led, series, colors[3], reverse)
+                if *display {
+                    fmt.Println(packet)
+                    fmt.Println("TCP")
+                }
+                castPacket(led, series, colors[3], reverse)
             }else{
-                fmt.Println(packet)
-                fmt.Println("OTHERS")
+                if *display {
+                    fmt.Println(packet)
+                    fmt.Println("OTHERS")
+                }
                 castPacket(led, series, colors[0], reverse)
             }
         }
