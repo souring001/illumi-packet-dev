@@ -7,6 +7,8 @@ import (
     "time"
     "log"
     "os"
+    "net"
+    "errors"
     "github.com/jgarff/rpi_ws281x/golang/ws2811"
     "github.com/google/gopacket"
     "github.com/google/gopacket/pcap"
@@ -14,8 +16,6 @@ import (
 )
 
 const (
-    ipAddr     = "172.16.81.4"
-    // ipAddr     = "169.254.204.201"
     device     = "eth0"
     pin        = 18
     series     = 12
@@ -38,6 +38,7 @@ var (
         0xFF00FF, //8 Cyan DHCP
         0xFF0000, //9 Lime DNS
     }
+    ipAddr       string = "172.16.81.4"
     display             = flag.Bool("display", false, "display packet details")
     snapshot_len int32  = 1024
     promiscuous  bool   = false
@@ -47,7 +48,18 @@ var (
 )
 
 func main() {
+    // option flag
     flag.Parse()
+
+    // set ipAddress
+    ip, err_ip := externalIP()
+	if err_ip != nil {
+        fmt.Println(err_ip)
+    }else{
+        ipAddr = ip
+        fmt.Println("ip address is:", ipAddr)
+    }
+
     // Open device
     handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
     if err != nil {log.Fatal(err) }
@@ -221,4 +233,48 @@ func isAnomaly(packet gopacket.Packet) bool {
         }
     }
     return anml
+}
+
+// This func get the last ip. If there are wlan0 and eth0, eth0 will be chosen.
+func externalIP() (string, error) {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
+	}
+    var ipaddr net.IP
+	for _, iface := range ifaces {
+		if iface.Flags&net.FlagUp == 0 {
+			continue // interface down
+		}
+		if iface.Flags&net.FlagLoopback != 0 {
+			continue // loopback interface
+		}
+		addrs, err := iface.Addrs()
+		if err != nil {
+			return "", err
+		}
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			if ip == nil || ip.IsLoopback() {
+				continue
+			}
+			ip = ip.To4()
+			if ip == nil {
+				continue // not an ipv4 address
+			}
+            ipaddr = ip
+			// return ip.String(), nil
+		}
+    }
+    if ipaddr == nil{
+        return "", errors.New("are you connected to the network?")
+    }else{
+        return ipaddr.String(), nil
+    }
 }
