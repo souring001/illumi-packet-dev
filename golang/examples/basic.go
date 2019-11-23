@@ -235,7 +235,7 @@ func isAnomaly(packet gopacket.Packet) bool {
     return anml
 }
 
-// This func get the last ip. If there are wlan0 and eth0, eth0 will be chosen.
+// This func get the first ip. If there are eth0 and wlan0, eth0 will be chosen.
 func externalIP() (string, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
@@ -269,7 +269,7 @@ func externalIP() (string, error) {
 				continue // not an ipv4 address
 			}
             ipaddr = ip
-			// return ip.String(), nil
+			return ip.String(), nil //if you want the last one, comment out this line
 		}
     }
     if ipaddr == nil{
