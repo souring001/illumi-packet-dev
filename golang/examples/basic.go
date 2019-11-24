@@ -62,24 +62,24 @@ func main() {
         fmt.Println("ip address is:", ipAddr)
     }
 
-    // fmt.Println("Initialize color leds")
-    led := make([]uint32, count)
+    // Open device
+    handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
+    if err != nil {log.Fatal(err) }
+    defer handle.Close()
 
-    if *showip {
-        showIPaddress(led, ipAddr)
+    defer ws2811.Fini()
+    err := ws2811.Init(pin, count, brightness)
+    if err != nil {
+        fmt.Println(err)
     } else {
-        // Open device
-        handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
-        if err != nil {log.Fatal(err) }
-        defer handle.Close()
+        // fmt.Println("Press Ctr-C to quit.")
 
-        defer ws2811.Fini()
-        err := ws2811.Init(pin, count, brightness)
-        if err != nil {
-            fmt.Println(err)
-        } else {
-            // fmt.Println("Press Ctr-C to quit.")
+        // fmt.Println("Initialize color leds")
+        led := make([]uint32, count)
 
+        if *showip {
+            showIPaddress(led, ipAddr)
+        }else{
             // Use the handle as a packet source to process all packets
             packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
             // fmt.Println("start capturing...")
@@ -295,7 +295,7 @@ func showIPaddress(led []uint32, ipaddr string) {
 		//number
 		for j := 0; j < 8; j++ {
 			t := i * 9 + j
-	        if (ipv4[i]>>uint(7-j))&1 { // nth bit of Y = (X>>n)&1;
+	        if (ipv4[i]>>uint(7-j))&1 == 1 { // nth bit of Y = (X>>n)&1;
                 led[t] = colors[0]
             }
 	    }
