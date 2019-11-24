@@ -38,6 +38,7 @@ var (
         0x88FF00, //7 Orange IGMP
         0xFF00FF, //8 Cyan DHCP
         0xFF0000, //9 Lime DNS
+        0x888888, //10 GRAY
     }
     ipAddr       string = "255.255.255.255"
     display             = flag.Bool("display", false, "display packet details")
@@ -296,7 +297,7 @@ func showIPaddress(led []uint32, ipaddr string) {
 		for j := 0; j < 8; j++ {
 			t := i * 9 + j
 	        if (ipv4[i]>>uint(7-j))&1 == 1 { // nth bit of Y = (X>>n)&1;
-                led[t] = colors[0]
+                led[t] = colors[10]
             }
 	    }
 
