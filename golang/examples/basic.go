@@ -65,7 +65,7 @@ func main() {
     // fmt.Println("Initialize color leds")
     led := make([]uint32, count)
 
-    if showip {
+    if *showip {
         showIPaddress(led, ipAddr)
     } else {
         // Open device
@@ -289,15 +289,13 @@ func showIPaddress(led []uint32, ipaddr string) {
 	ip := net.ParseIP(ipaddr)
 	ipv4 := ip.To4()
 
-	fmt.Println(ipv4[0])
-
     initLeds(led)
 	for i := 0; i < IPv4len; i++ {
 
 		//number
 		for j := 0; j < 8; j++ {
 			t := i * 9 + j
-	        if (ipv4[i]>>(7-j))&1 { // nth bit of Y = (X>>n)&1;
+	        if (ipv4[i]>>uint(7-j))&1 { // nth bit of Y = (X>>n)&1;
                 led[t] = colors[0]
             }
 	    }
