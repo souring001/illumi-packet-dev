@@ -43,6 +43,9 @@ var (
     ipAddr       string = "255.255.255.255"
     display             = flag.Bool("display", false, "display packet details")
     showip              = flag.Bool("ipaddr", false, "display ip address")
+    xarp              = flag.Bool("xarp", false, "disable arp")
+    xtcp              = flag.Bool("xtcp", false, "disable tcp")
+    xudp              = flag.Bool("xudp", false, "disable udp")
     snapshot_len int32  = 1024
     promiscuous  bool   = false
     err          error
@@ -148,7 +151,7 @@ func main() {
                         fmt.Println("DHCPv4")
                     }
                     castPacket(led, series, colors[8], reverse)
-                }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil {
+                }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil && !*xarp{
                     if *display {
                         fmt.Println(packet)
                         fmt.Println("ARP")
@@ -160,13 +163,13 @@ func main() {
                         fmt.Println("IGMP")
                     }
                     castPacket(led, series, colors[4], reverse)
-                }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil {
+                }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil && !*xudp{
                     if *display {
                         fmt.Println(packet)
                         fmt.Println("UDP")
                     }
                     castPacket(led, series, colors[6], reverse)
-                }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil {
+                }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil && !*xtcp{
                     if *display {
                         fmt.Println(packet)
                         fmt.Println("TCP")
