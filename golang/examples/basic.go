@@ -151,30 +151,36 @@ func main() {
                         fmt.Println("DHCPv4")
                     }
                     castPacket(led, series, colors[8], reverse)
-                }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil && !*xarp{
+                }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil{
                     if *display {
                         fmt.Println(packet)
                         fmt.Println("ARP")
                     }
-                    castPacket(led, series, colors[7], reverse)
+                    if !*xarp{
+                        castPacket(led, series, colors[7], reverse)
+                    }
                 }else if igmp := packet.Layer(layers.LayerTypeIGMP); igmp != nil {
                     if *display {
                         fmt.Println(packet)
                         fmt.Println("IGMP")
                     }
                     castPacket(led, series, colors[4], reverse)
-                }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil && !*xudp{
+                }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil{
                     if *display {
                         fmt.Println(packet)
                         fmt.Println("UDP")
                     }
-                    castPacket(led, series, colors[6], reverse)
-                }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil && !*xtcp{
+                    if !*xudp{
+                        castPacket(led, series, colors[6], reverse)
+                    }
+                }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil{
                     if *display {
                         fmt.Println(packet)
                         fmt.Println("TCP")
                     }
-                    castPacket(led, series, colors[3], reverse)
+                    if !*xtcp{
+                        castPacket(led, series, colors[3], reverse)
+                    }
                 }else{
                     if *display {
                         fmt.Println(packet)
