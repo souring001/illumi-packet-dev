@@ -65,7 +65,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     defer handle.Close()
 
-    // Initialize LED stripe
+    // Initialize LED strip
     err := ws2811.Init(pin, count, brightness)
     if err != nil { log.Fatal(err) }
     defer ws2811.Fini()
