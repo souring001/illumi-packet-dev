@@ -44,7 +44,7 @@ var (
     xarp         = flag.Bool("xarp", false, "disable arp")
     xtcp         = flag.Bool("xtcp", false, "disable tcp")
     xudp         = flag.Bool("xudp", false, "disable udp")
-    snapshotLen  = 1024
+    snapshotLen  = int32(1024)
     promiscuous  = false
     timeout      = 50 * time.Millisecond
     device string
@@ -66,15 +66,15 @@ func main() {
     defer handle.Close()
 
     // Initialize LED strip
-    err := ws2811.Init(pin, count, brightness)
-    if err != nil { log.Fatal(err) }
+    errl := ws2811.Init(pin, count, brightness)
+    if errl != nil { log.Fatal(errl) }
     defer ws2811.Fini()
     fmt.Println("Press Ctr-C to quit.")
 
     led := make([]uint32, count)
 
     if *showip {
-        showIPaddress(led, ipAddr)
+        showIPAddress(led, ipAddr)
     }else{
         // Use the handle as a packet source to process all packets
         packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
