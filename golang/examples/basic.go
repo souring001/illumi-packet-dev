@@ -120,7 +120,6 @@ func main() {
             }
 
             packetName := categorizePacket(packet)
-            fmt.Println(packetName)
             layerMeta := layerMap[packetName]
 
             if *debug {
@@ -130,80 +129,6 @@ func main() {
             if layerMeta.show {
                 castPacket(led, series, layerMeta.color, reverse)
             }
-
-            // Anomary detection
-            // if isAnomaly(packet) {
-            //     if *debug {
-            //         fmt.Println("ANOMALY")
-            //     }
-            //     castPacket(led, series, colors[2], reverse)
-            // }else if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
-            //     if *debug {
-            //         fmt.Println(packet)
-            //         fmt.Println("LLDP")
-            //     }
-            //     castPacket(led, series, colors[0], reverse)
-            // }else if dns := packet.Layer(layers.LayerTypeDNS); dns != nil {
-            //     if *debug {
-            //         fmt.Println(packet)
-            //         fmt.Println("DNS")
-            //     }
-            //     castPacket(led, series, colors[9], reverse)
-            // }else if icmpv4 := packet.Layer(layers.LayerTypeICMPv4); icmpv4 != nil {
-            //     if *debug {
-            //         fmt.Println(packet)
-            //         fmt.Println("ICMPv4")
-            //     }
-            //     castPacket(led, series, colors[5], reverse)
-            // }else if icmpv6 := packet.Layer(layers.LayerTypeICMPv6); icmpv6 != nil {
-            //     if *debug {
-            //         fmt.Println(packet)
-            //         fmt.Println("ICMPv6")
-            //     }
-            //     castPacket(led, series, colors[5], reverse)
-            // }else if dhcpv4 := packet.Layer(layers.LayerTypeDHCPv4); dhcpv4 != nil {
-            //     if *debug {
-            //         fmt.Println(packet)
-            //         fmt.Println("DHCPv4")
-            //     }
-            //     castPacket(led, series, colors[8], reverse)
-            // }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil{
-            //     if *debug {
-            //         fmt.Println(packet)
-            //         fmt.Println("ARP")
-            //     }
-            //     if !*xarp{
-            //         castPacket(led, series, colors[7], reverse)
-            //     }
-            // }else if igmp := packet.Layer(layers.LayerTypeIGMP); igmp != nil {
-            //     if *debug {
-            //         fmt.Println(packet)
-            //         fmt.Println("IGMP")
-            //     }
-            //     castPacket(led, series, colors[4], reverse)
-            // }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil{
-            //     if *debug {
-            //         fmt.Println(packet)
-            //         fmt.Println("UDP")
-            //     }
-            //     if !*xudp{
-            //         castPacket(led, series, colors[6], reverse)
-            //     }
-            // }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil{
-            //     if *debug {
-            //         fmt.Println(packet)
-            //         fmt.Println("TCP")
-            //     }
-            //     if !*xtcp{
-            //         castPacket(led, series, colors[3], reverse)
-            //     }
-            // }else{
-            //     if *debug {
-            //         fmt.Println(packet)
-            //         fmt.Println("OTHERS")
-            //     }
-            //     castPacket(led, series, colors[0], reverse)
-            // }
         }
 
     }
