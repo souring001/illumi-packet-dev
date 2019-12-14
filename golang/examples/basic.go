@@ -130,7 +130,6 @@ func main() {
                 castPacket(led, series, layerMeta.color, reverse)
             }
         }
-
     }
 }
 
@@ -265,7 +264,9 @@ func showIPAddress(led []uint32, ipaddr string) {
 
 func categorizePacket(packet gopacket.Packet) string {
     packetName := "Others";
-    if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
+    if isAnomaly(packet) {
+        packetName = "Anomaly"
+    }else if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
         packetName = "LLDP"
     }else if dns := packet.Layer(layers.LayerTypeDNS); dns != nil {
         packetName = "DNS"
