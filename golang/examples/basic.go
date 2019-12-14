@@ -68,18 +68,18 @@ var (
 
 func main() {
     // option flag
-    flag.String(&device, "device", "eth0", "set network interface")
+    flag.StringVar(&device, "device", "eth0", "set network interface")
     flag.Parse()
 
     meta := layerMap["ARP"]
     meta.show = *xarp
     layerMap["ARP"] = meta
 
-    meta := layerMap["TCP"]
+    meta = layerMap["TCP"]
     meta.show = *xtcp
     layerMap["TCP"] = meta
 
-    meta := layerMap["UDP"]
+    meta = layerMap["UDP"]
     meta.show = *xudp
     layerMap["UDP"] = meta
 
