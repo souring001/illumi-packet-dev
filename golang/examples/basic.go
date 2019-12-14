@@ -105,7 +105,7 @@ func main() {
     led := make([]uint32, count)
 
     if *showip {
-        showIPAddress(led, ipAddr)
+        showIPAddress(led, ipv4Addr)
     }else{
         // Use the handle as a packet source to process all packets
         packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
@@ -194,7 +194,7 @@ func isAnomaly(packet gopacket.Packet) bool {
     return anml
 }
 
-func externalIP() (string, error) {
+func externalIP() (string, string, error) {
     ifaces, err := net.Interfaces()
 	if err != nil {
 		return "", "", err
