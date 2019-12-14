@@ -71,9 +71,17 @@ func main() {
     flag.String(&device, "device", "eth0", "set network interface")
     flag.Parse()
 
-    layerMap["ARP"].show = xarp
-    layerMap["TCP"].show = xtcp
-    layerMap["UDP"].show = xudp
+    meta := layerMap["ARP"]
+    meta.show = *xarp
+    layerMap["ARP"] = meta
+
+    meta := layerMap["TCP"]
+    meta.show = *xtcp
+    layerMap["TCP"] = meta
+
+    meta := layerMap["UDP"]
+    meta.show = *xudp
+    layerMap["UDP"] = meta
 
     // set ipAddress
     ipAddr, err := externalIP()
@@ -113,14 +121,14 @@ func main() {
 
             packetName := categorizePacket(packet)
             fmt.Println(packetName)
-            meta := layerMap[packetName]
+            layerMeta := layerMap[packetName]
 
             if *debug {
                 fmt.Println(packetName)
                 fmt.Println(packet)
             }
-            if meta.show {
-                castPacket(led, series, meta.color, reverse)
+            if layerMeta.show {
+                castPacket(led, series, layerMeta.color, reverse)
             }
 
             // Anomary detection
