@@ -43,8 +43,9 @@ var (
         0xFF0000, //9 Lime DNS
         0x888888, //10 GRAY
     }
-    speed        = 4    // speed of flowing packet
-    debug       = flag.Bool("debug", true, "print packet details")
+    speed int     // speed of flowing packet
+    device string //eth0
+    debug        = flag.Bool("debug", true, "print packet details")
     showip       = flag.Bool("ipaddr", false, "display ip address")
     xarp         = flag.Bool("xarp", false, "disable arp")
     xtcp         = flag.Bool("xtcp", false, "disable tcp")
@@ -52,7 +53,6 @@ var (
     snapshotLen  = int32(1024)
     promiscuous  = false
     timeout      = 50 * time.Millisecond
-    device string
     layerMap = map[string]layerMeta{
         "ARP":      layerMeta{ color: colors[7], show: true },
         "ICMP":     layerMeta{ color: colors[5], show: true },
@@ -68,6 +68,7 @@ var (
 
 func main() {
     // option flag
+    flag.IntVar(&speed, "speed", 4, "set speed of flowing packet")
     flag.StringVar(&device, "device", "eth0", "set network interface")
     flag.Parse()
 
