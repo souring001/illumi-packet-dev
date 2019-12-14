@@ -72,15 +72,15 @@ func main() {
     flag.Parse()
 
     meta := layerMap["ARP"]
-    meta.show = *xarp
+    meta.show = !*xarp
     layerMap["ARP"] = meta
 
     meta = layerMap["TCP"]
-    meta.show = *xtcp
+    meta.show = !*xtcp
     layerMap["TCP"] = meta
 
     meta = layerMap["UDP"]
-    meta.show = *xudp
+    meta.show = !*xudp
     layerMap["UDP"] = meta
 
     // set ipAddress
