@@ -15,6 +15,11 @@ import (
     "github.com/google/gopacket/layers"
 )
 
+type layerMeta struct{
+    color uint32
+    show bool
+}
+
 const (
     ipv4Len    = 4
     pin        = 18     // GPIO
@@ -28,7 +33,7 @@ var (
         // GRB color
         0xFFFFFF, //0 White others
         0x880000, //1 Green
-        0x00FF00, //2 Red
+        0x00FF00, //2 Red Anomaly
         0x0000FF, //3 Blue TCP
         0x0066cc, //4 Purple ARP
         0x33FF99, //5 Pink ICMP
@@ -39,7 +44,7 @@ var (
         0x888888, //10 GRAY
     }
     speed        = 4    // speed of flowing packet
-    detail       = flag.Bool("detail", false, "print packet details")
+    debug       = flag.Bool("debug", true, "print packet details")
     showip       = flag.Bool("ipaddr", false, "display ip address")
     xarp         = flag.Bool("xarp", false, "disable arp")
     xtcp         = flag.Bool("xtcp", false, "disable tcp")
@@ -48,6 +53,17 @@ var (
     promiscuous  = false
     timeout      = 50 * time.Millisecond
     device string
+    layerMap = map[string]layerMeta{
+        "ARP":      layerMeta{ color: colors[7], show: true },
+        "ICMP":     layerMeta{ color: colors[5], show: true },
+        "TCP":      layerMeta{ color: colors[3], show: true },
+        "UDP":      layerMeta{ color: colors[6], show: true },
+        "IGMP":     layerMeta{ color: colors[4], show: true },
+        "DNS":      layerMeta{ color: colors[9], show: true },
+        "DHCP":     layerMeta{ color: colors[8], show: true },
+        "Anomaly":  layerMeta{ color: colors[2], show: true },
+        "Others":   layerMeta{ color: colors[0], show: true },
+    }
 )
 
 func main() {
@@ -55,10 +71,14 @@ func main() {
     flag.String(&device, "device", "eth0", "set network interface")
     flag.Parse()
 
+    layerMap["ARP"].show = xarp
+    layerMap["TCP"].show = xtcp
+    layerMap["UDP"].show = xudp
+
     // set ipAddress
     ipAddr, err := externalIP()
 	if err != nil { log.Fatal(err) }
-    fmt.Println("IP address is:", ipAddr)
+    if *debug { fmt.Println("IP address is:", ipAddr) }
 
     // Open device
     handle, err := pcap.OpenLive(device, snapshotLen, promiscuous, timeout)
@@ -69,7 +89,7 @@ func main() {
     errl := ws2811.Init(pin, count, brightness)
     if errl != nil { log.Fatal(errl) }
     defer ws2811.Fini()
-    fmt.Println("Press Ctr-C to quit.")
+    if *debug { fmt.Println("Press Ctr-C to quit.") }
 
     led := make([]uint32, count)
 
@@ -78,7 +98,7 @@ func main() {
     }else{
         // Use the handle as a packet source to process all packets
         packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
-        fmt.Println("Start capturing...")
+        if *debug { fmt.Println("Start capturing...") }
 
         for packet := range packetSource.Packets() {
 
@@ -91,79 +111,91 @@ func main() {
                 }
             }
 
-            // Anomary detection
-            if isAnomaly(packet) {
-                if *detail {
-                    fmt.Println("ANOMALY")
-                }
-                castPacket(led, series, colors[2], reverse)
-            }else if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
-                if *detail {
-                    fmt.Println(packet)
-                    fmt.Println("LLDP")
-                }
-                castPacket(led, series, colors[0], reverse)
-            }else if dns := packet.Layer(layers.LayerTypeDNS); dns != nil {
-                if *detail {
-                    fmt.Println(packet)
-                    fmt.Println("DNS")
-                }
-                castPacket(led, series, colors[9], reverse)
-            }else if icmpv4 := packet.Layer(layers.LayerTypeICMPv4); icmpv4 != nil {
-                if *detail {
-                    fmt.Println(packet)
-                    fmt.Println("ICMPv4")
-                }
-                castPacket(led, series, colors[5], reverse)
-            }else if icmpv6 := packet.Layer(layers.LayerTypeICMPv6); icmpv6 != nil {
-                if *detail {
-                    fmt.Println(packet)
-                    fmt.Println("ICMPv6")
-                }
-                castPacket(led, series, colors[5], reverse)
-            }else if dhcpv4 := packet.Layer(layers.LayerTypeDHCPv4); dhcpv4 != nil {
-                if *detail {
-                    fmt.Println(packet)
-                    fmt.Println("DHCPv4")
-                }
-                castPacket(led, series, colors[8], reverse)
-            }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil{
-                if *detail {
-                    fmt.Println(packet)
-                    fmt.Println("ARP")
-                }
-                if !*xarp{
-                    castPacket(led, series, colors[7], reverse)
-                }
-            }else if igmp := packet.Layer(layers.LayerTypeIGMP); igmp != nil {
-                if *detail {
-                    fmt.Println(packet)
-                    fmt.Println("IGMP")
-                }
-                castPacket(led, series, colors[4], reverse)
-            }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil{
-                if *detail {
-                    fmt.Println(packet)
-                    fmt.Println("UDP")
-                }
-                if !*xudp{
-                    castPacket(led, series, colors[6], reverse)
-                }
-            }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil{
-                if *detail {
-                    fmt.Println(packet)
-                    fmt.Println("TCP")
-                }
-                if !*xtcp{
-                    castPacket(led, series, colors[3], reverse)
-                }
-            }else{
-                if *detail {
-                    fmt.Println(packet)
-                    fmt.Println("OTHERS")
-                }
-                castPacket(led, series, colors[0], reverse)
+            packetName := categorizePacket(packet)
+            fmt.Println(packetName)
+            meta := layerMap[packetName]
+
+            if *debug {
+                fmt.Println(packetName)
+                fmt.Println(packet)
             }
+            if meta.show {
+                castPacket(led, series, meta.color, reverse)
+            }
+
+            // Anomary detection
+            // if isAnomaly(packet) {
+            //     if *debug {
+            //         fmt.Println("ANOMALY")
+            //     }
+            //     castPacket(led, series, colors[2], reverse)
+            // }else if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
+            //     if *debug {
+            //         fmt.Println(packet)
+            //         fmt.Println("LLDP")
+            //     }
+            //     castPacket(led, series, colors[0], reverse)
+            // }else if dns := packet.Layer(layers.LayerTypeDNS); dns != nil {
+            //     if *debug {
+            //         fmt.Println(packet)
+            //         fmt.Println("DNS")
+            //     }
+            //     castPacket(led, series, colors[9], reverse)
+            // }else if icmpv4 := packet.Layer(layers.LayerTypeICMPv4); icmpv4 != nil {
+            //     if *debug {
+            //         fmt.Println(packet)
+            //         fmt.Println("ICMPv4")
+            //     }
+            //     castPacket(led, series, colors[5], reverse)
+            // }else if icmpv6 := packet.Layer(layers.LayerTypeICMPv6); icmpv6 != nil {
+            //     if *debug {
+            //         fmt.Println(packet)
+            //         fmt.Println("ICMPv6")
+            //     }
+            //     castPacket(led, series, colors[5], reverse)
+            // }else if dhcpv4 := packet.Layer(layers.LayerTypeDHCPv4); dhcpv4 != nil {
+            //     if *debug {
+            //         fmt.Println(packet)
+            //         fmt.Println("DHCPv4")
+            //     }
+            //     castPacket(led, series, colors[8], reverse)
+            // }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil{
+            //     if *debug {
+            //         fmt.Println(packet)
+            //         fmt.Println("ARP")
+            //     }
+            //     if !*xarp{
+            //         castPacket(led, series, colors[7], reverse)
+            //     }
+            // }else if igmp := packet.Layer(layers.LayerTypeIGMP); igmp != nil {
+            //     if *debug {
+            //         fmt.Println(packet)
+            //         fmt.Println("IGMP")
+            //     }
+            //     castPacket(led, series, colors[4], reverse)
+            // }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil{
+            //     if *debug {
+            //         fmt.Println(packet)
+            //         fmt.Println("UDP")
+            //     }
+            //     if !*xudp{
+            //         castPacket(led, series, colors[6], reverse)
+            //     }
+            // }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil{
+            //     if *debug {
+            //         fmt.Println(packet)
+            //         fmt.Println("TCP")
+            //     }
+            //     if !*xtcp{
+            //         castPacket(led, series, colors[3], reverse)
+            //     }
+            // }else{
+            //     if *debug {
+            //         fmt.Println(packet)
+            //         fmt.Println("OTHERS")
+            //     }
+            //     castPacket(led, series, colors[0], reverse)
+            // }
         }
 
     }
@@ -296,4 +328,28 @@ func showIPAddress(led []uint32, ipaddr string) {
         fmt.Println("Error during wipe " + err.Error())
         os.Exit(-1)
     }
+}
+
+func categorizePacket(packet gopacket.Packet) string {
+    packetName := "Others";
+    if lldp := packet.Layer(layers.LayerTypeLinkLayerDiscovery); lldp != nil {
+        packetName = "LLDP"
+    }else if dns := packet.Layer(layers.LayerTypeDNS); dns != nil {
+        packetName = "DNS"
+    }else if icmpv4 := packet.Layer(layers.LayerTypeICMPv4); icmpv4 != nil {
+        packetName = "ICMP"
+    }else if icmpv6 := packet.Layer(layers.LayerTypeICMPv6); icmpv6 != nil {
+        packetName = "ICMP"
+    }else if dhcpv4 := packet.Layer(layers.LayerTypeDHCPv4); dhcpv4 != nil {
+        packetName = "DHCP"
+    }else if arp := packet.Layer(layers.LayerTypeARP); arp != nil {
+        packetName = "ARP"
+    }else if igmp := packet.Layer(layers.LayerTypeIGMP); igmp != nil {
+        packetName = "IGMP"
+    }else if udp := packet.Layer(layers.LayerTypeUDP); udp != nil {
+        packetName = "UDP"
+    }else if tcp := packet.Layer(layers.LayerTypeTCP); tcp != nil {
+        packetName = "TCP"
+    }
+    return packetName
 }
