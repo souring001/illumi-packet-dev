@@ -47,9 +47,9 @@ var (
     device string //eth0
     debug        = flag.Bool("debug", true, "print packet details")
     showip       = flag.Bool("ipaddr", false, "display ip address")
-    xarp         = flag.Bool("xarp", false, "disable arp")
-    xtcp         = flag.Bool("xtcp", false, "disable tcp")
-    xudp         = flag.Bool("xudp", false, "disable udp")
+    xarp         = flag.Bool("narp", false, "disable arp")
+    xtcp         = flag.Bool("ntcp", false, "disable tcp")
+    xudp         = flag.Bool("nudp", false, "disable udp")
     snapshotLen  = int32(1024)
     promiscuous  = false
     timeout      = 50 * time.Millisecond
@@ -73,15 +73,15 @@ func main() {
     flag.Parse()
 
     meta := layerMap["ARP"]
-    meta.show = !*xarp
+    meta.show = !*narp
     layerMap["ARP"] = meta
 
     meta = layerMap["TCP"]
-    meta.show = !*xtcp
+    meta.show = !*ntcp
     layerMap["TCP"] = meta
 
     meta = layerMap["UDP"]
-    meta.show = !*xudp
+    meta.show = !*nudp
     layerMap["UDP"] = meta
 
     // set ipAddress
