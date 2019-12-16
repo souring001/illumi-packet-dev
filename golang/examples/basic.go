@@ -24,7 +24,7 @@ const (
     ipv4Len    = 4
     pin        = 18     // GPIO
     series     = 12     // length of trail
-    count      = 144    // number of LEDs
+    count      = 60    // number of LEDs
     brightness = 50     // max 255
 )
 
@@ -113,6 +113,16 @@ func main() {
         if *debug { fmt.Println("Start capturing...") }
 
         for packet := range packetSource.Packets() {
+            fmt.Println("----------------")
+
+            packetTime := packet.Metadata().Timestamp
+            nowTime := time.Now()
+            diffTime := nowTime.Sub(packetTime)
+            if *debug { fmt.Println("delay:", diffTime) }
+            if diffTime > 10 * time.Second {
+                if *debug { fmt.Println("skip\n") }
+                continue
+            }
 
             // Direction of the packet
             reverse := true
