@@ -99,7 +99,7 @@ func main() {
     led := make([]uint32, count)
 
     if *reset {
-        resetLEDs(led)
+        resetLeds(led)
         os.Exit(0)
     }
 
