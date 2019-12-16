@@ -26,6 +26,19 @@ const (
     series     = 6     // length of trail
     count      = 60    // number of LEDs
     brightness = 50     // max 255
+)
+
+var (
+    speed int     // speed of flowing packet
+    device string //eth0
+    debug        = flag.Bool("debug", true, "print packet details")
+    showip       = flag.Bool("ipaddr", false, "display ip address")
+    narp         = flag.Bool("narp", false, "disable arp")
+    ntcp         = flag.Bool("ntcp", false, "disable tcp")
+    nudp         = flag.Bool("nudp", false, "disable udp")
+    snapshotLen  = int32(1024)
+    promiscuous  = false
+    timeout      = 50 * time.Millisecond
     colors = []uint32{
         // GRB color
         0xFFFFFF, //0 White others
@@ -40,19 +53,6 @@ const (
         0xFF0000, //9 Lime DNS
         0x888888, //10 GRAY
     }
-)
-
-var (
-    speed int     // speed of flowing packet
-    device string //eth0
-    debug        = flag.Bool("debug", true, "print packet details")
-    showip       = flag.Bool("ipaddr", false, "display ip address")
-    narp         = flag.Bool("narp", false, "disable arp")
-    ntcp         = flag.Bool("ntcp", false, "disable tcp")
-    nudp         = flag.Bool("nudp", false, "disable udp")
-    snapshotLen  = int32(1024)
-    promiscuous  = false
-    timeout      = 50 * time.Millisecond
     layerMap = map[string]layerMeta{
         "ARP":      layerMeta{ color: colors[7], show: true },
         "ICMP":     layerMeta{ color: colors[5], show: true },
