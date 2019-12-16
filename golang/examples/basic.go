@@ -47,9 +47,9 @@ var (
     device string //eth0
     debug        = flag.Bool("debug", true, "print packet details")
     showip       = flag.Bool("ipaddr", false, "display ip address")
-    xarp         = flag.Bool("narp", false, "disable arp")
-    xtcp         = flag.Bool("ntcp", false, "disable tcp")
-    xudp         = flag.Bool("nudp", false, "disable udp")
+    narp         = flag.Bool("narp", false, "disable arp")
+    ntcp         = flag.Bool("ntcp", false, "disable tcp")
+    nudp         = flag.Bool("nudp", false, "disable udp")
     snapshotLen  = int32(1024)
     promiscuous  = false
     timeout      = 50 * time.Millisecond
