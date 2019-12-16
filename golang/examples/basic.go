@@ -113,7 +113,7 @@ func main() {
         if *debug { fmt.Println("Start capturing...") }
 
         for packet := range packetSource.Packets() {
-            fmt.Println("----------------")
+            if *debug { fmt.Println("----------------") }
 
             packetTime := packet.Metadata().Timestamp
             nowTime := time.Now()
