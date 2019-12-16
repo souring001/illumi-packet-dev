@@ -115,15 +115,6 @@ func main() {
         for packet := range packetSource.Packets() {
             if *debug { fmt.Println("----------------") }
 
-            packetTime := packet.Metadata().Timestamp
-            nowTime := time.Now()
-            diffTime := nowTime.Sub(packetTime)
-            if *debug { fmt.Println("delay:", diffTime) }
-            if diffTime > 5 * time.Second {
-                if *debug { fmt.Println("skip\n") }
-                continue
-            }
-
             // Direction of the packet
             reverse := true
             if net := packet.NetworkLayer(); net != nil {
@@ -140,6 +131,16 @@ func main() {
                 fmt.Println(packetName)
                 fmt.Println(packet)
             }
+
+            packetTime := packet.Metadata().Timestamp
+            nowTime := time.Now()
+            diffTime := nowTime.Sub(packetTime)
+            if *debug { fmt.Println("delay:", diffTime) }
+            if diffTime > 5 * time.Second {
+                if *debug { fmt.Println("skip\n") }
+                continue
+            }
+
             if layerMeta.show {
                 castPacket(led, series, layerMeta.color, reverse)
             }
