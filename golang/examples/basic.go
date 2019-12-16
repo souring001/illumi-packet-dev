@@ -94,7 +94,6 @@ func main() {
     errl := ws2811.Init(pin, count, brightness)
     if errl != nil { log.Fatal(errl) }
     defer ws2811.Fini()
-    if *debug { fmt.Println("Press Ctr-C to quit.") }
 
     led := make([]uint32, count)
 
@@ -118,7 +117,10 @@ func main() {
 
     // Use the handle as a packet source to process all packets
     packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
-    if *debug { fmt.Println("Start capturing...") }
+    if *debug {
+        fmt.Println("Press Ctr-C to quit.")
+        fmt.Println("Start capturing...")
+    }
 
     for packet := range packetSource.Packets() {
         if *debug { fmt.Println("----------------") }
