@@ -26,9 +26,6 @@ const (
     series     = 12     // length of trail
     count      = 60    // number of LEDs
     brightness = 50     // max 255
-)
-
-var (
     colors = []uint32{
         // GRB color
         0xFFFFFF, //0 White others
@@ -43,6 +40,9 @@ var (
         0xFF0000, //9 Lime DNS
         0x888888, //10 GRAY
     }
+)
+
+var (
     speed int     // speed of flowing packet
     device string //eth0
     debug        = flag.Bool("debug", true, "print packet details")
@@ -119,7 +119,7 @@ func main() {
             nowTime := time.Now()
             diffTime := nowTime.Sub(packetTime)
             if *debug { fmt.Println("delay:", diffTime) }
-            if diffTime > 10 * time.Second {
+            if diffTime > 5 * time.Second {
                 if *debug { fmt.Println("skip\n") }
                 continue
             }
