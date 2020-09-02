@@ -138,7 +138,7 @@ func main() {
         if arpLayer := packet.Layer(layers.LayerTypeARP); arpLayer != nil {
           arp := arpLayer.(*layers.ARP)
           src := net.HardwareAddr(arp.SourceHwAddress).String()
-          if strings.Contains(src.String(), macAddr) {
+          if strings.Contains(src, macAddr) {
               reverse = false
           }
         }
