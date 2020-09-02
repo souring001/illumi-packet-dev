@@ -129,8 +129,8 @@ func main() {
         // Direction of the packet
         reverse := true
         if net := packet.NetworkLayer(); net != nil {
-            src, _ := net.NetworkFlow().Endpoints()
-            if strings.Contains(src.String(), ipv4Addr) || strings.Contains(src.String(), ipv6Addr) {
+            src, _ := net.NetworkFlow().Endpoints().String()
+            if strings.Contains(src, ipv4Addr) || strings.Contains(src, ipv6Addr) {
                 reverse = false
             }
         }
